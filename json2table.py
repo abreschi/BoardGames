@@ -30,6 +30,8 @@ cols = (
   "wanting",
   "trading",
   "wishing",
+  "numweights",
+  "averageweight",
 )
 
 print "\t".join(["id"] + [col for col in cols])
