@@ -39,7 +39,7 @@ for k,v in d.iteritems():
   line = "\t".join(
     [k] +
     [
-      ",".join(v.get(col, "NA"))
+      ",".join(v.get(col, "NA")).replace("\t", " ")
         if isinstance(v.get(col),list) 
         else str(v.get(col, "NA"))
         for col in cols

@@ -44,10 +44,10 @@ for item in soup.find_all("item"):
 	# Extract collection table
 	d["description"] = item.find("description").get_text()
 	for t in tag_w_value:
-		d[t] = item.find(t)["value"]
+		d[t] = item.find(t)["value"].replace("\t", " ")
 	
 	for l in item.find_all("link"):
-		d.setdefault(l["type"], []).append( l["id"] + "_" + l["value"] )
+		d.setdefault(l["type"], []).append( l["id"] + "_" + l["value"].replace("\t"," "))
 	
 	d["n_comments"] = sum(int(c["totalitems"]) for c in item.find_all("comments"))
 		
