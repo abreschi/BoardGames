@@ -4,6 +4,8 @@ import urllib
 from bs4 import BeautifulSoup
 import sys
 import json
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 ID = sys.argv[1]
 
