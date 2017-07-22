@@ -11,15 +11,16 @@ n=$(echo $(cat game_list.tsv | wc -l)/500 | bc); for i in $(eval echo {0..${n}})
 cluster_job.py -i run.retrieve -o clust -nl 100 -f -q rg-el7,short-sl7 -Q
 
 cat json.chunks/*.json | sed 's/^[{]//;s/[}]$/,/' | sed '1i{' | sed '$ s/.$//' | sed -e "\$a}" > mdata.games.json
-
 cat mdata.games.json | python -m json.tool > mdata.games.format.json
-
-grep username mdata.games.format.json | awk -F '"' '{print $(NF-1)}' | sort | uniq -c | awk '{print $2"\t"$1}' > users.list.txt
 
 python json2table.py mdata.games.json > mdata.games.tsv
 
-shuf users.list.txt | head -10000 | cut -f1 | while read name; do echo "python retrieve_users_info.py $name > \"users/${name}.json\""; done > run.users
-
 cat game_list.tsv | awk 'BEGIN{OFS=FS="\t"}{split($3,a,"/");print a[3]"\t"$5}' | python join.py -a stdin -b mdata.games.tsv --b_header | sed '1s/V1/year/' > mdata.games.year.tsv
+gzip < mdata.games.year.tsv > mdata.games.year.tsv.gz
 
+# USERS
+grep username mdata.games.format.json | awk -F '"' '{print $(NF-1)}' | sort | uniq -c | awk '{print $2"\t"$1}' > users.list.txt
+shuf users.list.txt | head -10000 | cut -f1 | while read name; do echo "python retrieve_users_info.py $name > \"users/${name}.json\""; done > run.users
 ll users/ | awk '$5==0{print $NF}' | fgrep -wf - run.users | bash 2> /dev/null &
+
+
