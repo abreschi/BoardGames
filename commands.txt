@@ -1,0 +1,16 @@
+for i in {1..920}; do echo "python browse_games.py ${i} > browse_pages/${i}.tsv"; done > run.browse
+cluster_job.py -i run.browse -o clust -nl 10 -f -Q
+
+# Header: rank, figure, href, name, year, geek_rate, avg_rate, num_voters, market
+cat browse_pages/* > game_list.tsv
+
+rm -r clust/ browse_pages/
+
+mkdir -p json.chunks/
+n=$(echo $(cat game_list.tsv | wc -l)/500 | bc); for i in $(eval echo {0..${n}}); do echo "python retrieve_game_info.py $(cat game_list.tsv | tail -n+$((i*500)) | head -500 | cut -f3 | cut -f3 -d/ | paste -sd ',') > json.chunks/${i}.json"; done > run.retrieve
+cluster_job.py -i run.retrieve -o clust -nl 100 -f -q rg-el7,short-sl7 -Q
+
+cat json.chunks/*.json | sed 's/^[{]//;s/[}]$/,/' | sed '1i{' | sed '$ s/.$//' | sed -e "\$a}" > mdata.games.json
+
+cat mdata.games.json | python -m json.tool > mdata.games.format.json
+
