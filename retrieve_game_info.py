@@ -17,6 +17,7 @@ soup = BeautifulSoup(s)
 
 
 tag_w_value = (
+	"yearpublished",
 	"minplayers",
 	"maxplayers",
 	"playingtime",
