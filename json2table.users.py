@@ -16,7 +16,7 @@ cols = (
   "lastname",
   "n_buddies",
   "name",
-  "stateprovince",
+  "stateorprovince",
   "yearregistered",
 )
 

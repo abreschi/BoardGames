@@ -133,4 +133,10 @@ artists = data.table(melt(strsplit(dt[!is.na(boardgameartist),][["boardgameartis
 # Select only board games where 2 or more artists participated
 artists = artists[L1 %in% artists[,.N,by="L1"][N>1][["L1"]],]
 
+#---------------------
+# COMMENTS - RATINGS
+#---------------------
 
+c = fread("comments.users.country.tsv")
+
+c[["text"]] = NULL
