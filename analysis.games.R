@@ -7,6 +7,9 @@ theme_set(theme_bw(base_size=18))
 
 dt = fread("mdata.games.year.tsv")
 
+#------------------
+# DATA PROCESSING
+#------------------
 
 # Assign playing time to predefined intervals
 playingtimes = c(5,10,20,30,40,60,90,120,180,240)
@@ -21,6 +24,9 @@ dt[["year"]] = as.numeric(dt[["year"]])
 # Replace early years by NA
 dt[["year"]]= replace(dt[["year"]], dt[["year"]]<1940 | dt[["year"]]>2020, NA)
 
+#---------------
+# CORRELATIONS
+#---------------
 
 # Longer games are perceived as more complicated
 ggplot(dt) + geom_density(aes(x=averageweight, color=as.factor(playingtime)), size=3)
@@ -31,6 +37,10 @@ ggplot(dt) + geom_boxplot(aes(x=as.factor(playingtime), y=average), size=3)
 # Complicated games have higher ratings
 ggplot(dt[average>0]) + stat_bin_hex(aes(average, averageweight, fill=log(..count..)), binwidth=0.1)
 
+
+#-------------
+# CATEGORIES
+#-------------
 
 categories = data.table(melt(strsplit(dt$boardgamecategory, ",")))
 categories[["value"]] = factor(categories[["value"]], levels=categories[,.N,by="value"][order(N)][["value"]])
@@ -58,6 +68,9 @@ a = (acast(categories[!is.na(year)&!is.na(value),.N,by=c("year","value")], value
 pdf("tmp.pdf", h=7, w=15)
 plot(hclust(dist(scale(a)), method="complete"))
 dev.off()
+
+# Network of categories
+data.table(do.call(rbind, lapply(strsplit(head(dt[grep(",", boardgamecategory),][["boardgamecategory"]]), ","), function(x) if(length(x)>1) {t(combn(x,2))})))[,.N, ]
 
 
 
