@@ -1,6 +1,6 @@
 library(data.table)
 library(ggplot2)
-
+library(reshape2)
 
 theme_set(theme_bw(base_size=18))
 
@@ -22,7 +22,10 @@ dt[["maxplayers"]] = unlist(sapply(replace(dt[["maxplayers"]], is.na(dt[["maxpla
 # Some year was badly parsed so needs to be converted to numeric
 dt[["year"]] = as.numeric(dt[["year"]])
 # Replace early years by NA
-dt[["year"]]= replace(dt[["year"]], dt[["year"]]<1940 | dt[["year"]]>2020, NA)
+dt[["year"]] = replace(dt[["year"]], dt[["year"]]<1940 | dt[["year"]]>2020, NA)
+
+# Number of publishers per game
+dt[["n_publishers"]] = sapply(dt$boardgamepublisher, function(x)length(strsplit(x, ",")[[1]]))
 
 #---------------
 # CORRELATIONS
@@ -70,7 +73,26 @@ plot(hclust(dist(scale(a)), method="complete"))
 dev.off()
 
 # Network of categories
-data.table(do.call(rbind, lapply(strsplit(head(dt[grep(",", boardgamecategory),][["boardgamecategory"]]), ","), function(x) if(length(x)>1) {t(combn(x,2))})))[,.N, ]
+categories_matrix = acast(cbind(categories[!is.na(value),], c=1), L1~value, value.var="c", fill=0)
 
 
+#-------------
+# MECHANISMS
+#-------------
+
+categories = data.table(melt(strsplit(dt$boardgamecategory, ",")))
+categories[["value"]] = factor(categories[["value"]], levels=categories[,.N,by="value"][order(N)][["value"]])
+categories[["usersrated"]] = dt[["usersrated"]][match(categories$L1, row.names(dt[,"usersrated"]))]
+categories[["average"]] = dt[["average"]][match(categories$L1, row.names(dt[,"average"]))]
+categories[["playingtime"]] = dt[["playingtime"]][match(categories$L1, row.names(dt[,"playingtime"]))]
+categories[["year"]] = dt[["year"]][match(categories$L1, row.names(dt[,"year"]))]
+
+categories_summary = categories[,list(.N,median(usersrated), mean(average), mean(playingtime)),by="value"]
+
+# Card games and War games are the categories with the most games
+ggplot(na.omit(categories)[, .N, by="value"][order(N),]) + geom_histogram(aes(x=value,y=N), stat='identity') + theme(axis.text=element_text(angle=45, hjust=1))
+
+
+
+publishers = data.table(melt(strsplit(dt$boardgamepublisher, ",")))
 
