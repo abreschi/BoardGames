@@ -9,8 +9,10 @@ sys.setdefaultencoding('utf8')
 
 ID = sys.argv[1]
 
-
-f = urllib.urlopen("https://www.boardgamegeek.com/xmlapi2/user?name=%s&buddies=1&guilds=1" %(ID))
+urlcode = None
+while urlcode != 200:
+	f = urllib.urlopen("https://www.boardgamegeek.com/xmlapi2/user?name=%s&buddies=1&guilds=1" %(ID))
+	urlcode = f.getcode()
 s = f.read()
 f.close()
 
