@@ -30,5 +30,5 @@ cat mdata.users.json | python -m json.tool > mdata.users.format.json
 python json2table.users.py mdata.users.json
 
 # Add the country information to the comments. Take only users for which there is country info
-cat comments.users.tsv | awk -v f="mdata.users.tsv" 'BEGIN{OFS=FS="\t";while(getline<f>0){if($2!="NA"){d[$7]=($2=="United States"?($8!="NA"?$8:$2):$2)}}} NR==1 {print $0, "country"} NR>1 && d[$3]!="" {print $0, d[$3]}' > comments.users.country.tsv
+cat comments.users.tsv | awk -v f="mdata.users.tsv" -v c="country.dict.tsv" 'BEGIN{OFS=FS="\t";while(getline<c>0){country[$1]=$2} while(getline<f>0){if($2!="NA"&&country[$2]!=""){d[$7]=($2=="United States"?($8!="NA"?$8:$2):$2)}}} NR==1 {print $0, "country"} NR>1 && d[$3]!="" {print $0, country[d[$3]]}' > comments.users.country.tsv
 
