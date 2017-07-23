@@ -129,3 +129,8 @@ mechanic_playingtime = acast(mechanic[,.N,by=c("value","playingtime")], value~pl
 #--------------
 
 artists = data.table(melt(strsplit(dt[!is.na(boardgameartist),][["boardgameartist"]], ",")))
+
+# Select only board games where 2 or more artists participated
+artists = artists[L1 %in% artists[,.N,by="L1"][N>1][["L1"]],]
+
+
