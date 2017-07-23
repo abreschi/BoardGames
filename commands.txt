@@ -27,3 +27,8 @@ cat run.users | awk '{print $3}' | fgrep -vf - users.list.txt | shuf | head -100
 cat users*/*json | sed 's/^[{]//;s/[}]$/,/' | sed '1i{' | sed '$ s/.$//' | sed -e "\$a}" > mdata.users.json
 cat mdata.users.json | python -m json.tool > mdata.users.format.json
 
+python json2table.users.py mdata.users.json
+
+# Add the country information to the comments. Take only users for which there is country info
+cat comments.users.tsv | awk -v f="mdata.users.tsv" 'BEGIN{OFS=FS="\t";while(getline<f>0){if($2!="NA"){d[$7]=($2=="United States"?($8!="NA"?$8:$2):$2)}}} NR==1 {print $0, "country"} NR>1 && d[$3]!="" {print $0, d[$3]}' > comments.users.country.tsv
+
