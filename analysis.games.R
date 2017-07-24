@@ -12,7 +12,7 @@ dt = fread("mdata.games.year.tsv")
 #------------------
 
 # Assign playing time to predefined intervals
-playingtimes = c(5,10,20,30,40,60,90,120,180,240)
+playingtimes = c(0,5,10,20,30,40,60,90,120,180,240)
 dt[["playingtime"]] = unlist(sapply(replace(dt[["playingtime"]], is.na(dt[["playingtime"]]), 0), function(x) playingtimes[which.min(abs(x-playingtimes))]))
 
 # Assign max number of players to predefined intervals
@@ -32,6 +32,9 @@ dt[["n_publishers"]] = unlist(sapply(replace(dt[["n_publishers"]], is.na(dt[["n_
 
 # Consider minimum age 18 even for older ages
 dt[["minage"]] = replace(dt[["minage"]], dt[["minage"]]>18, 18)
+
+# Bin the average rating in 10 bins
+dt[["average_bin"]] = cut(dt[["average"]],10)
 
 #---------------
 # SUMMARY
@@ -59,6 +62,13 @@ ggplot(dt[,mean(average),by="n_publishers"][order(n_publishers),]) + geom_histog
 
 # Users like more games for teenagers
 ggplot(dt[,mean(average),by="minage"]) + geom_bar(aes(x=as.factor(minage),y=V1), stat="identity")
+
+# The most popular games (most owned) have an average rating of 7.5
+ggplot(dt[average!=0&owned!=0,]) + geom_hex(aes(average, owned, fill=log10(..count..)))
+
+# Games wiht 20 publishers are the most popular ones (most owned)
+ggplot(dt) + geom_boxplot(aes(as.factor(n_publishers), owned))
+
 
 #-------------
 # CATEGORIES
